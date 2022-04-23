@@ -1,16 +1,16 @@
 # telosbrowser
 
-A new Flutter project.
+A search browser that allows us to view html data stored in the telos blockchain.
+
+It provides redunancy across 32 nodes and notifies the user if less than 3 confirmations are met.
+
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+If you have a telos account, please create a table with the same name as the account name and assign html data to "domainvalue" in the first row of the table.
 
-A few resources to get you started if this is your first Flutter project:
+We can search by the account name which will return this html data.
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+eg. as a sample, account name akatsukitsui is searchable via telosbrowser.
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Thankyou for reading.

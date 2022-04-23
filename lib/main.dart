@@ -12,39 +12,20 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Telos Browser',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Telos Browser'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 
@@ -94,9 +75,19 @@ class _MyHomePageState extends State<MyHomePage> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController tce = TextEditingController();
   String htmlData = "";
+  bool twoConfirmations = false;
+  bool oneConfirmation = false;
+  bool isLoading = false;
   String htmlErrorData = "<html><div>network issue</div></html>";
 
   void performRedundancyNetworkRequests() async {
+
+    setState(() {
+      isLoading = true;
+    });
+
+    oneConfirmation = false;
+    twoConfirmations = false;
 
     var random = Random();
 
@@ -156,6 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
 
+    // all confirmations successful
     if((responses[0] == responses[1]) && (responses[1] == responses[2])){
       if(responses[0] == null || responses[0].isEmpty == 0){
         setState(() {
@@ -166,12 +158,49 @@ class _MyHomePageState extends State<MyHomePage> {
           htmlData = responses[0];
         });
       }
-    }else{
-      setState(() {
-        htmlData = htmlErrorData;
-      });
+    }
+    // confirmations are partially successful, return response with most confirmations
+    else{
+      if(responses[0] == responses[1] && responses[0] != null){
+        setState(() {
+          twoConfirmations = true;
+          htmlData = responses[0];
+        });
+      }else if(responses[0] == responses[2] && responses[0] != null){
+        setState(() {
+          twoConfirmations = true;
+          htmlData = responses[0];
+        });
+      }else if(responses[1] == responses[2] && responses[1] != null){
+        setState(() {
+          twoConfirmations = true;
+          htmlData = responses[1];
+        });
+      }else if(responses[0] != null){
+        setState(() {
+          oneConfirmation = true;
+          htmlData = responses[0];
+        });
+      }else if(responses[1] != null){
+        setState(() {
+          oneConfirmation = true;
+          htmlData = responses[1];
+        });
+      }else if(responses[2] != null){
+        setState(() {
+          oneConfirmation = true;
+          htmlData = responses[2];
+        });
+      }else{
+        setState(() {
+          htmlData = htmlErrorData;
+        });
+      }
     }
 
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Future<String> performNetworkRequest(String peer) async {
@@ -276,9 +305,24 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Scaffold(
           body: Container(
               child: SingleChildScrollView(
-                  child: Column(
+                  child: (isLoading)?
+                      Column(
+                        children: [
+                          SizedBox(height: 300),
+                          Container(
+                            alignment: Alignment.center,
+                              child: CircularProgressIndicator()
+                          )
+                        ]
+                      ) :
+                  Column(
                       children: [
                         SizedBox(height: 50),
+                        (oneConfirmation)?
+                        _buildPartialConfirmationWarning(1)
+                            : (twoConfirmations)?
+                        _buildPartialConfirmationWarning(2)
+                            : Container(),
                         Html(
                           data: htmlData,
                           onLinkTap: (url, _, __, ___) {
@@ -291,6 +335,19 @@ class _MyHomePageState extends State<MyHomePage> {
               )
           ),
         )
+    );
+  }
+
+  Widget _buildPartialConfirmationWarning(int confirmations){
+    return Container(
+          padding: EdgeInsets.only(left: 18, right: 18, top: 23, bottom: 18),
+          margin: EdgeInsets.only(bottom: 10),
+          color: Colors.amber,
+          height: 60,
+          child: Text('response has was partially confirmed with $confirmations confirmation${(confirmations != 1)? 's' : ''}', softWrap: true,
+              style: TextStyle(
+                fontSize: 12,
+              ))
     );
   }
 }
