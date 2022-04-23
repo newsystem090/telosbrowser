@@ -315,6 +315,21 @@ class _MyHomePageState extends State<MyHomePage> {
                           )
                         ]
                       ) :
+                  (htmlData.isEmpty)?
+                  Column(
+                      children: [
+                        SizedBox(height: 300),
+                        Container(
+                            alignment: Alignment.center,
+                            child: Icon(Icons.search, size: 30,)
+                        ),
+                        SizedBox(height: 10),
+                        Container(
+                            alignment: Alignment.center,
+                            child: Text('Search')
+                        )
+                      ]
+                  ) :
                   Column(
                       children: [
                         SizedBox(height: 50),
